@@ -28,12 +28,6 @@ export const schedulePresets: Record<ScheduleMethod, SchedulePreset> = {
     shortBreakMinutes: 10,
     longBreakMinutes: 25,
     cyclesBeforeLongBreak: 3
-  },
-  countdown: {
-    method: "countdown",
-    label: "Countdown only",
-    focusMinutes: 0,
-    shortBreakMinutes: 15
   }
 };
 

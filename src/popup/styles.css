@@ -749,16 +749,11 @@ body[data-theme="dark"] .mini-action {
 }
 
 .brand-mark {
-  display: grid;
   width: 34px;
   height: 34px;
-  place-items: center;
   border-radius: 9px;
-  color: #fff;
-  background: linear-gradient(145deg, #ff914d, #f97316);
-  box-shadow: 0 12px 24px rgba(249, 115, 22, 0.28);
-  font-size: 18px;
-  font-weight: 900;
+  object-fit: cover;
+  box-shadow: 0 12px 24px rgba(249, 115, 22, 0.22);
 }
 
 .brand-header h1 {
@@ -874,7 +869,8 @@ body[data-theme="dark"] .ring-knob {
 .timer-ring p {
   margin: 0 0 2px;
   color: #4c4742;
-  font-size: 13px;
+  font-size: 18px;
+  font-weight: 700;
   text-align: center;
 }
 
@@ -1130,7 +1126,6 @@ body[data-theme="dark"] {
   color: var(--text);
 }
 
-.brand-mark,
 .button-primary,
 .button-danger,
 .timer-card .button-primary,

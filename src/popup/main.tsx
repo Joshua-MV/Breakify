@@ -14,6 +14,8 @@ import type { BreakifyStateResponse, CurrentTabOption } from "../shared/messages
 import type { BreakEndBehavior, BreakifySettings, ScheduleMethod } from "../shared/types";
 import "./styles.css";
 
+const MAX_BREAK_SECONDS = 2 * 60 * 60;
+
 function formatRemaining(ms: number): string {
   const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
   const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
@@ -23,6 +25,7 @@ function formatRemaining(ms: number): string {
 
 function App() {
   const ringRef = useRef<HTMLDivElement>(null);
+  const hydratedRef = useRef(false);
   const [state, setState] = useState<BreakifyStateResponse>({ settings: defaultSettings, history: [] });
   const [tabs, setTabs] = useState<CurrentTabOption[]>([]);
   const [breakSeconds, setBreakSeconds] = useState(minutesToSeconds(defaultSettings.defaultBreakMinutes));
@@ -39,13 +42,15 @@ function App() {
   async function refresh() {
     const response = await sendBreakifyMessage({ type: "GET_STATE" });
     if (response.ok && "state" in response) {
+      const savedBreakSeconds = minutesToSeconds(response.state.settings.defaultBreakMinutes);
       setState(response.state);
-      setBreakSeconds(minutesToSeconds(response.state.settings.defaultBreakMinutes));
+      setBreakSeconds(savedBreakSeconds > MAX_BREAK_SECONDS ? 0 : savedBreakSeconds);
       setSoftWarningSeconds(minutesToSeconds(response.state.settings.softWarningMinutes));
       setSelectedTabIds(response.state.settings.selectedBreakTabIds);
       setSelectedReturnTabIds(response.state.settings.selectedReturnTabIds);
       setScheduleMethod(response.state.settings.scheduleMethod);
       setBreakEndBehavior(response.state.settings.breakEndBehavior);
+      hydratedRef.current = true;
     }
 
     const tabsResponse = await sendBreakifyMessage({ type: "GET_CURRENT_TABS" });
@@ -68,13 +73,21 @@ function App() {
   const remaining = activeSession ? getRemainingMs(activeSession, now) : 0;
   const pendingConfirmation = activeSession?.status === "pending-confirmation";
 
+  useEffect(() => {
+    if (!hydratedRef.current || activeSession) return;
+    const timeout = window.setTimeout(() => {
+      void saveSettingsPatch({ defaultBreakMinutes: secondsToMinutes(breakSeconds) });
+    }, 250);
+    return () => window.clearTimeout(timeout);
+  }, [breakSeconds, activeSession]);
+
   const selectedCount = useMemo(() => selectedTabIds.filter((id) => tabs.some((tab) => tab.id === id)).length, [selectedTabIds, tabs]);
   const selectedTabs = tabs.filter((tab) => selectedTabIds.includes(tab.id));
   const availableTabs = tabs.filter((tab) => !selectedTabIds.includes(tab.id));
   const selectedReturnTabs = tabs.filter((tab) => selectedReturnTabIds.includes(tab.id));
   const availableReturnTabs = tabs.filter((tab) => !selectedReturnTabIds.includes(tab.id) && !selectedTabIds.includes(tab.id));
   const scheduleDetails = getSchedulePreset(scheduleMethod, state.settings.customSchedule);
-  const maxRingSeconds = 2 * 60 * 60;
+  const maxRingSeconds = MAX_BREAK_SECONDS;
   const ringAngle = Math.max(0, Math.min(360, (breakSeconds / maxRingSeconds) * 360));
   const ringSizePx = 268;
   const ringStrokePx = 14;
@@ -183,7 +196,7 @@ function App() {
   return (
     <main className="popup-shell">
       <header className="brand-header">
-        <div className="brand-mark">E</div>
+        <img className="brand-mark" src="/icons/icon-48.png" alt="" />
         <h1>Breakify</h1>
       </header>
 

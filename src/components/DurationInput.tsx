@@ -21,16 +21,34 @@ export function DurationInput({ label, valueSeconds, hint, minSeconds = 0, onCha
       <legend>{label}</legend>
       <div className="duration-grid">
         <label>
-          <span>Hours</span>
-          <input type="number" min={0} value={parts.hours} onChange={(event) => update("hours", Number(event.target.value))} />
+          <span>HRS</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={parts.hours.toString().padStart(2, "0")}
+            onFocus={(event) => event.currentTarget.select()}
+            onChange={(event) => update("hours", Number(event.target.value.replace(/\D/g, "") || 0))}
+          />
         </label>
         <label>
-          <span>Minutes</span>
-          <input type="number" min={0} max={59} value={parts.minutes} onChange={(event) => update("minutes", Number(event.target.value))} />
+          <span>MIN</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={parts.minutes.toString().padStart(2, "0")}
+            onFocus={(event) => event.currentTarget.select()}
+            onChange={(event) => update("minutes", Number(event.target.value.replace(/\D/g, "") || 0))}
+          />
         </label>
         <label>
-          <span>Seconds</span>
-          <input type="number" min={0} max={59} value={parts.seconds} onChange={(event) => update("seconds", Number(event.target.value))} />
+          <span>SEC</span>
+          <input
+            type="text"
+            inputMode="numeric"
+            value={parts.seconds.toString().padStart(2, "0")}
+            onFocus={(event) => event.currentTarget.select()}
+            onChange={(event) => update("seconds", Number(event.target.value.replace(/\D/g, "") || 0))}
+          />
         </label>
       </div>
       {hint ? <p>{hint}</p> : null}

@@ -2,7 +2,7 @@ export type BreakEndBehavior = "ask-first" | "auto-close";
 export type ThemeMode = "light" | "dark";
 export type SessionStatus = "active" | "warning" | "pending-confirmation" | "completed" | "cancelled";
 export type SessionOutcome = "on-time" | "late" | "early" | "cancelled";
-export type ScheduleMethod = "pomodoro" | "fifty-two-seventeen" | "ultradian" | "custom" | "countdown";
+export type ScheduleMethod = "pomodoro" | "fifty-two-seventeen" | "ultradian" | "custom";
 export type AllowlistRuleType = "domain" | "url";
 
 export interface AllowlistRule {

@@ -1,5 +1,5 @@
 import { DEFAULT_BREAK_MINUTES, DEFAULT_SOFT_WARNING_MINUTES } from "../shared/constants";
-import type { BreakifySettings } from "../shared/types";
+import type { BreakifySettings, ScheduleMethod } from "../shared/types";
 
 export const defaultSettings: BreakifySettings = {
   defaultBreakMinutes: DEFAULT_BREAK_MINUTES,
@@ -21,9 +21,12 @@ export const defaultSettings: BreakifySettings = {
 };
 
 export function mergeSettings(settings?: Partial<BreakifySettings>): BreakifySettings {
+  const scheduleMethod = isScheduleMethod(settings?.scheduleMethod) ? settings.scheduleMethod : defaultSettings.scheduleMethod;
+
   return {
     ...defaultSettings,
     ...settings,
+    scheduleMethod,
     selectedBreakTabIds: settings?.selectedBreakTabIds ?? defaultSettings.selectedBreakTabIds,
     selectedReturnTabIds: settings?.selectedReturnTabIds ?? defaultSettings.selectedReturnTabIds,
     allowlistRules: settings?.allowlistRules ?? defaultSettings.allowlistRules,
@@ -32,4 +35,8 @@ export function mergeSettings(settings?: Partial<BreakifySettings>): BreakifySet
       ...settings?.customSchedule
     }
   };
+}
+
+function isScheduleMethod(value: unknown): value is ScheduleMethod {
+  return value === "pomodoro" || value === "fifty-two-seventeen" || value === "ultradian" || value === "custom";
 }

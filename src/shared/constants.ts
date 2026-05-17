@@ -1,4 +1,4 @@
-export const DEFAULT_BREAK_MINUTES = 15;
+export const DEFAULT_BREAK_MINUTES = 0;
 export const DEFAULT_SOFT_WARNING_MINUTES = 2;
 export const HISTORY_RETENTION_DAYS = 90;
 export const ALARM_BREAK_WARNING = "breakify:break-warning";
