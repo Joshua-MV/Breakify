@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Check, Clock3, X } from "lucide-react";
+import { Check, Clock3, Plus, X } from "lucide-react";
 import { getRemainingMs } from "../core/session";
 import { defaultSettings } from "../core/settings";
 import { Button } from "../components/Button";
@@ -44,6 +44,13 @@ function App() {
     window.close();
   }
 
+  async function extendBreak(minutes: number) {
+    const response = await sendBreakifyMessage({ type: "EXTEND_BREAK", payload: { minutes } });
+    if (response.ok && "state" in response) {
+      setState(response.state);
+    }
+  }
+
   const session = state.activeSession;
   const remaining = session ? getRemainingMs(session, now) : 0;
 
@@ -56,6 +63,14 @@ function App() {
       <h1>Your break is almost done.</h1>
       <div className="time">{formatRemaining(remaining)}</div>
       <p className="copy">Start wrapping up this tab so returning to work feels clean.</p>
+      <div className="extend-row" aria-label="Extend break">
+        <Button icon={<Plus size={15} />} onClick={() => extendBreak(5)}>
+          5 min
+        </Button>
+        <Button icon={<Plus size={15} />} onClick={() => extendBreak(10)}>
+          10 min
+        </Button>
+      </div>
       <div className="actions">
         <Button variant="primary" icon={<Check size={16} />} onClick={closeBreakTabs}>
           Return now

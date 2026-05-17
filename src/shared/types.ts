@@ -28,6 +28,7 @@ export interface BreakifySettings {
   theme: ThemeMode;
   scheduleMethod: ScheduleMethod;
   selectedBreakTabIds: number[];
+  selectedReturnTabIds: number[];
   allowlistRules: AllowlistRule[];
   customSchedule: SchedulePreset;
 }
@@ -99,4 +100,9 @@ export interface StartBreakInput {
   breakMinutes: number;
   softWarningMinutes: number;
   selectedBreakTabIds: number[];
+  selectedReturnTabIds: number[];
+}
+
+export interface ExtendBreakInput {
+  minutes: number;
 }

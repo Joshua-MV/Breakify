@@ -37,17 +37,21 @@ export async function getInitialBreakTabIds(selectedBreakTabIds: number[], allow
   return [...new Set(ids)];
 }
 
-export async function captureWorkSnapshot(excludedTabIds: number[] = []): Promise<WorkSnapshot> {
+export async function captureWorkSnapshot(excludedTabIds: number[] = [], preferredTabIds: number[] = []): Promise<WorkSnapshot> {
   const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const tabs = await chrome.tabs.query({});
   const excluded = new Set(excludedTabIds);
-  const workTabs = tabs.filter((tab) => typeof tab.id !== "number" || !excluded.has(tab.id));
+  const preferred = new Set(preferredTabIds);
+  const baseWorkTabs = tabs.filter((tab) => typeof tab.id !== "number" || !excluded.has(tab.id));
+  const preferredWorkTabs = preferred.size ? baseWorkTabs.filter((tab) => typeof tab.id === "number" && preferred.has(tab.id)) : [];
+  const workTabs = preferredWorkTabs.length ? preferredWorkTabs : baseWorkTabs;
   const activeWorkTab = workTabs.find((tab) => tab.active) ?? workTabs[0];
+  const activeTabInSnapshot = typeof activeTab?.id === "number" && workTabs.some((tab) => tab.id === activeTab.id);
 
   return {
     createdAt: Date.now(),
-    activeTabId: excluded.has(activeTab?.id ?? -1) ? activeWorkTab?.id : activeTab?.id,
-    activeWindowId: excluded.has(activeTab?.id ?? -1) ? activeWorkTab?.windowId : activeTab?.windowId,
+    activeTabId: activeTabInSnapshot ? activeTab?.id : activeWorkTab?.id,
+    activeWindowId: activeTabInSnapshot ? activeTab?.windowId : activeWorkTab?.windowId,
     tabs: workTabs.map(toSavedTab).filter((tab): tab is SavedTab => Boolean(tab))
   };
 }

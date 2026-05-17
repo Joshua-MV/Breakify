@@ -1,9 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Check, Clock3, Coffee, Moon, Plus, Settings, Square, Sun, X } from "lucide-react";
+import { BarChart3, Check, Clock3, Coffee, Moon, Plus, Settings, Square, Sun, X } from "lucide-react";
 import { minutesToSeconds, secondsToMinutes } from "../core/duration";
 import { getRemainingMs } from "../core/session";
-import { getDefaultBreakMinutes, schedulePresets } from "../core/schedule";
+import { getSchedulePreset, schedulePresets } from "../core/schedule";
 import { defaultSettings } from "../core/settings";
 import { Button } from "../components/Button";
 import { DurationInput } from "../components/DurationInput";
@@ -22,12 +22,15 @@ function formatRemaining(ms: number): string {
 }
 
 function App() {
+  const ringRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<BreakifyStateResponse>({ settings: defaultSettings, history: [] });
   const [tabs, setTabs] = useState<CurrentTabOption[]>([]);
   const [breakSeconds, setBreakSeconds] = useState(minutesToSeconds(defaultSettings.defaultBreakMinutes));
   const [softWarningSeconds, setSoftWarningSeconds] = useState(minutesToSeconds(defaultSettings.softWarningMinutes));
   const [selectedTabIds, setSelectedTabIds] = useState<number[]>([]);
+  const [selectedReturnTabIds, setSelectedReturnTabIds] = useState<number[]>([]);
   const [tabToAdd, setTabToAdd] = useState("");
+  const [returnTabToAdd, setReturnTabToAdd] = useState("");
   const [scheduleMethod, setScheduleMethod] = useState<ScheduleMethod>(defaultSettings.scheduleMethod);
   const [breakEndBehavior, setBreakEndBehavior] = useState<BreakEndBehavior>(defaultSettings.breakEndBehavior);
   const [now, setNow] = useState(Date.now());
@@ -40,6 +43,7 @@ function App() {
       setBreakSeconds(minutesToSeconds(response.state.settings.defaultBreakMinutes));
       setSoftWarningSeconds(minutesToSeconds(response.state.settings.softWarningMinutes));
       setSelectedTabIds(response.state.settings.selectedBreakTabIds);
+      setSelectedReturnTabIds(response.state.settings.selectedReturnTabIds);
       setScheduleMethod(response.state.settings.scheduleMethod);
       setBreakEndBehavior(response.state.settings.breakEndBehavior);
     }
@@ -67,6 +71,11 @@ function App() {
   const selectedCount = useMemo(() => selectedTabIds.filter((id) => tabs.some((tab) => tab.id === id)).length, [selectedTabIds, tabs]);
   const selectedTabs = tabs.filter((tab) => selectedTabIds.includes(tab.id));
   const availableTabs = tabs.filter((tab) => !selectedTabIds.includes(tab.id));
+  const selectedReturnTabs = tabs.filter((tab) => selectedReturnTabIds.includes(tab.id));
+  const availableReturnTabs = tabs.filter((tab) => !selectedReturnTabIds.includes(tab.id) && !selectedTabIds.includes(tab.id));
+  const scheduleDetails = getSchedulePreset(scheduleMethod, state.settings.customSchedule);
+  const maxRingSeconds = 2 * 60 * 60;
+  const ringAngle = Math.max(6, Math.min(360, (breakSeconds / maxRingSeconds) * 360));
 
   async function saveSettingsPatch(patch: Partial<BreakifySettings>) {
     const nextSettings = { ...state.settings, ...patch };
@@ -87,11 +96,12 @@ function App() {
       breakEndBehavior,
       defaultBreakMinutes: breakMinutes,
       softWarningMinutes,
-      selectedBreakTabIds: selectedTabIds
+      selectedBreakTabIds: selectedTabIds,
+      selectedReturnTabIds
     });
     const response = await sendBreakifyMessage({
       type: "START_BREAK",
-      payload: { breakMinutes, softWarningMinutes, selectedBreakTabIds: selectedTabIds }
+      payload: { breakMinutes, softWarningMinutes, selectedBreakTabIds: selectedTabIds, selectedReturnTabIds }
     });
     if (response.ok && "state" in response) setState(response.state);
     if (!response.ok) setError(response.error);
@@ -114,24 +124,48 @@ function App() {
     setSelectedTabIds((current) => current.filter((id) => id !== tabId));
   }
 
-  function chooseSchedule(method: ScheduleMethod) {
-    setScheduleMethod(method);
-    setBreakSeconds(minutesToSeconds(getDefaultBreakMinutes(method, state.settings.customSchedule)));
+  function addReturnTab() {
+    const id = Number(returnTabToAdd);
+    if (!Number.isInteger(id)) return;
+    setSelectedReturnTabIds((current) => (current.includes(id) ? current : [...current, id]));
+    setReturnTabToAdd("");
+  }
+
+  function removeReturnTab(tabId: number) {
+    setSelectedReturnTabIds((current) => current.filter((id) => id !== tabId));
+  }
+
+  function setTimeFromPointer(clientX: number, clientY: number) {
+    const rect = ringRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const radians = Math.atan2(clientY - centerY, clientX - centerX);
+    const normalized = (radians + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2);
+    const rawSeconds = (normalized / (Math.PI * 2)) * maxRingSeconds;
+    const snappedSeconds = Math.max(30, Math.round(rawSeconds / 30) * 30);
+    setBreakSeconds(snappedSeconds);
+  }
+
+  function startRingDrag(event: React.PointerEvent<HTMLDivElement>) {
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setTimeFromPointer(event.clientX, event.clientY);
+  }
+
+  function dragRing(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.buttons !== 1) return;
+    setTimeFromPointer(event.clientX, event.clientY);
+  }
+
+  function openSettingsPage() {
+    void chrome.tabs.create({ url: chrome.runtime.getURL("settings.html") });
   }
 
   return (
     <main className="popup-shell">
-      <header className="popup-header">
-        <div>
-          <p className="eyebrow">Breakify</p>
-          <h1>Return with less friction.</h1>
-        </div>
-        <button className="icon-link" title="Open dashboard" onClick={() => chrome.runtime.openOptionsPage()}>
-          <Settings size={18} />
-        </button>
-        <button className="icon-link" title="Toggle dark mode" onClick={toggleTheme}>
-          {state.settings.theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+      <header className="brand-header">
+        <div className="brand-mark">B</div>
+        <h1>Breakify</h1>
       </header>
 
       {activeSession ? (
@@ -159,36 +193,55 @@ function App() {
           )}
         </section>
       ) : (
-        <section className="stack">
-          <div className="control-card">
-            <Field label="Method">
-              <SelectInput value={scheduleMethod} onChange={(event) => chooseSchedule(event.target.value as ScheduleMethod)}>
-                {Object.values(schedulePresets).map((preset) => (
-                  <option key={preset.method} value={preset.method}>
-                    {preset.label}
-                  </option>
-                ))}
-              </SelectInput>
-            </Field>
-            <DurationInput label="Break length" valueSeconds={breakSeconds} minSeconds={1} onChange={setBreakSeconds} />
-            <DurationInput
-              label="Soft warning"
-              valueSeconds={softWarningSeconds}
-              minSeconds={0}
-              onChange={setSoftWarningSeconds}
-              hint="Breakify warns you this long before your break ends."
-            />
-            <Field label="When the break ends">
-              <SelectInput value={breakEndBehavior} onChange={(event) => setBreakEndBehavior(event.target.value as BreakEndBehavior)}>
-                <option value="ask-first">Ask me before closing tabs</option>
-                <option value="auto-close">Close break tabs automatically</option>
-              </SelectInput>
-            </Field>
-          </div>
+        <section className="start-flow">
+          <section className="timer-card">
+            <div
+              className="timer-ring"
+              ref={ringRef}
+              onPointerDown={startRingDrag}
+              onPointerMove={dragRing}
+              role="slider"
+              aria-label="Break duration"
+              aria-valuemin={30}
+              aria-valuemax={maxRingSeconds}
+              aria-valuenow={breakSeconds}
+            >
+              <span className="ring-knob" style={{ transform: `translate(-50%, -50%) rotate(${ringAngle}deg) translateY(-119px)` }} />
+              <p>Pick break time</p>
+              <DurationInput label="Break length" valueSeconds={breakSeconds} minSeconds={1} onChange={setBreakSeconds} />
+            </div>
+
+            <div className="inline-options">
+              <Field label="Method">
+                <SelectInput value={scheduleMethod} onChange={(event) => setScheduleMethod(event.target.value as ScheduleMethod)}>
+                  {Object.values(schedulePresets).map((preset) => (
+                    <option key={preset.method} value={preset.method}>
+                      {preset.label}
+                    </option>
+                  ))}
+                </SelectInput>
+              </Field>
+              <DurationInput
+                label="Soft warning"
+                valueSeconds={softWarningSeconds}
+                minSeconds={0}
+                onChange={setSoftWarningSeconds}
+                hint="Reminder before the break ends."
+              />
+              <div className="method-summary">
+                <span>Focus {scheduleDetails.focusMinutes ? `${scheduleDetails.focusMinutes} min` : "your pace"}</span>
+                <span>Break {scheduleDetails.shortBreakMinutes} min</span>
+              </div>
+            </div>
+
+            <Button variant="primary" icon={<Coffee size={17} />} onClick={startBreak}>
+              Start timer
+            </Button>
+          </section>
 
           <section className="tab-picker" aria-label="Break tabs">
             <div className="section-heading">
-              <span>Whitelisted break tabs</span>
+              <span>Break tabs</span>
               <StatusPill>{`${selectedCount} selected`}</StatusPill>
             </div>
             <div className="tab-add-row">
@@ -220,11 +273,53 @@ function App() {
             )}
           </section>
 
-          <Button variant="primary" icon={<Coffee size={17} />} onClick={startBreak}>
-            Start break
-          </Button>
+          <section className="tab-picker" aria-label="Return tabs">
+            <div className="section-heading">
+              <span>Return tabs</span>
+              <StatusPill>{`${selectedReturnTabs.length || "All"} selected`}</StatusPill>
+            </div>
+            <div className="tab-add-row">
+              <SelectInput value={returnTabToAdd} onChange={(event) => setReturnTabToAdd(event.target.value)}>
+                <option value="">Choose a work tab to return to</option>
+                {availableReturnTabs.map((tab) => (
+                  <option key={tab.id} value={tab.id}>
+                    {tab.title}
+                  </option>
+                ))}
+              </SelectInput>
+              <Button icon={<Plus size={16} />} onClick={addReturnTab} disabled={!returnTabToAdd}>
+                Add
+              </Button>
+            </div>
+            {selectedReturnTabs.length ? (
+              <div className="selected-tabs">
+                {selectedReturnTabs.map((tab) => (
+                  <div className="selected-tab" key={tab.id}>
+                    <span>{tab.title}</span>
+                    <button title="Remove tab" onClick={() => removeReturnTab(tab.id)}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="empty-note">Leave this empty to restore every work tab that is not part of your break.</p>
+            )}
+          </section>
         </section>
       )}
+
+      <nav className="bottom-actions" aria-label="Breakify actions">
+        <button className="mini-action" title="Toggle theme" onClick={toggleTheme}>
+          {state.settings.theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+        </button>
+        <button className="mini-action" title="History" onClick={() => chrome.runtime.openOptionsPage()}>
+          <BarChart3 size={17} />
+        </button>
+        <button className="mini-action" title="Settings" onClick={openSettingsPage}>
+          <Settings size={17} />
+        </button>
+      </nav>
 
       {error ? <p className="error">{error}</p> : null}
     </main>

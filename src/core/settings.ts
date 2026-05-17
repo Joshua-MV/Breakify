@@ -8,6 +8,7 @@ export const defaultSettings: BreakifySettings = {
   theme: "light",
   scheduleMethod: "pomodoro",
   selectedBreakTabIds: [],
+  selectedReturnTabIds: [],
   allowlistRules: [],
   customSchedule: {
     method: "custom",
@@ -24,6 +25,7 @@ export function mergeSettings(settings?: Partial<BreakifySettings>): BreakifySet
     ...defaultSettings,
     ...settings,
     selectedBreakTabIds: settings?.selectedBreakTabIds ?? defaultSettings.selectedBreakTabIds,
+    selectedReturnTabIds: settings?.selectedReturnTabIds ?? defaultSettings.selectedReturnTabIds,
     allowlistRules: settings?.allowlistRules ?? defaultSettings.allowlistRules,
     customSchedule: {
       ...defaultSettings.customSchedule,

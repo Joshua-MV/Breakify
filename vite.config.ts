@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         popup: resolve(rootDir, "popup.html"),
         options: resolve(rootDir, "options.html"),
+        settings: resolve(rootDir, "settings.html"),
         reminder: resolve(rootDir, "reminder.html"),
         background: resolve(rootDir, "src/background/index.ts")
       },

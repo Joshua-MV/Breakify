@@ -69,6 +69,23 @@ describe("tabs adapter", () => {
     expect(snapshot.activeTabId).toBe(1);
   });
 
+  it("uses selected return tabs when they are provided", async () => {
+    const query = vi
+      .fn()
+      .mockResolvedValueOnce([{ id: 1, windowId: 1, active: true }])
+      .mockResolvedValueOnce([
+        { id: 1, windowId: 1, index: 0, url: "https://work.example", active: true, pinned: false },
+        { id: 2, windowId: 1, index: 1, url: "https://notes.example", active: false, pinned: false },
+        { id: 3, windowId: 1, index: 2, url: "https://break.example", active: false, pinned: false }
+      ]);
+    vi.stubGlobal("chrome", { tabs: { query } });
+
+    const snapshot = await captureWorkSnapshot([3], [2]);
+
+    expect(snapshot.tabs.map((tab) => tab.id)).toEqual([2]);
+    expect(snapshot.activeTabId).toBe(2);
+  });
+
   it("finds already-open tabs that match selected ids or allowlist rules", async () => {
     const query = vi.fn().mockResolvedValue([
       { id: 1, url: "https://work.example" },

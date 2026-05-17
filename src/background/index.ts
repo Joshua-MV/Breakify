@@ -9,6 +9,7 @@ import {
   trackBreakTab
 } from "../core/session";
 import { getDefaultBreakMinutes } from "../core/schedule";
+import { minutesToMs } from "../core/schedule";
 import { ALARM_BREAK_END, ALARM_BREAK_WARNING } from "../shared/constants";
 import type { BreakifyMessage, BreakifyResponse } from "../shared/messages";
 import type { BreakSession, SessionOutcome } from "../shared/types";
@@ -73,7 +74,7 @@ async function handleMessage(message: BreakifyMessage): Promise<BreakifyResponse
     if (message.type === "START_BREAK") {
       const settings = await getSettings();
       const initialBreakTabIds = await getInitialBreakTabIds(message.payload.selectedBreakTabIds, settings.allowlistRules);
-      const workSnapshot = await captureWorkSnapshot(initialBreakTabIds);
+      const workSnapshot = await captureWorkSnapshot(initialBreakTabIds, message.payload.selectedReturnTabIds);
       const breakMinutes = message.payload.breakMinutes || getDefaultBreakMinutes(settings.scheduleMethod, settings.customSchedule);
       const session = createBreakSession({
         settings,
@@ -82,6 +83,7 @@ async function handleMessage(message: BreakifyMessage): Promise<BreakifyResponse
         softWarningMinutes: message.payload.softWarningMinutes,
         selectedBreakTabIds: initialBreakTabIds
       });
+      session.settings.selectedReturnTabIds = message.payload.selectedReturnTabIds;
       await saveSettings(session.settings);
       const sessionToStore = session.warningAt <= Date.now() + 1000 ? markSessionWarned(session, Date.now()) : session;
       await saveActiveSession(sessionToStore);
@@ -111,6 +113,26 @@ async function handleMessage(message: BreakifyMessage): Promise<BreakifyResponse
     if (message.type === "KEEP_BREAK_TABS") {
       const session = await getActiveSession();
       if (session) await finishSession(session, false);
+      return { ok: true, state: await getState() };
+    }
+
+    if (message.type === "EXTEND_BREAK") {
+      const session = await getActiveSession();
+      if (session) {
+        const now = Date.now();
+        const extensionMs = minutesToMs(message.payload.minutes);
+        const endsAt = Math.max(session.endsAt, now) + extensionMs;
+        const warningAt = Math.max(now, endsAt - minutesToMs(session.settings.softWarningMinutes));
+        const extended: BreakSession = {
+          ...session,
+          status: warningAt > now + 1000 ? "active" : session.status,
+          endsAt,
+          warningAt,
+          pendingConfirmation: false
+        };
+        await saveActiveSession(extended);
+        await scheduleBreakAlarms(extended);
+      }
       return { ok: true, state: await getState() };
     }
 
