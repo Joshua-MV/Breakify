@@ -75,7 +75,16 @@ function App() {
   const availableReturnTabs = tabs.filter((tab) => !selectedReturnTabIds.includes(tab.id) && !selectedTabIds.includes(tab.id));
   const scheduleDetails = getSchedulePreset(scheduleMethod, state.settings.customSchedule);
   const maxRingSeconds = 2 * 60 * 60;
-  const ringAngle = Math.max(6, Math.min(360, (breakSeconds / maxRingSeconds) * 360));
+  const ringAngle = Math.max(0, Math.min(360, (breakSeconds / maxRingSeconds) * 360));
+  const ringSizePx = 268;
+  const ringStrokePx = 14;
+  const ringCenterPx = ringSizePx / 2;
+  const ringRadiusPx = (ringSizePx - ringStrokePx) / 2;
+  const ringRadians = (ringAngle / 360) * Math.PI * 2;
+  const ringCircumference = 2 * Math.PI * ringRadiusPx;
+  const ringProgress = ringAngle / 360;
+  const ringKnobX = ringCenterPx + Math.sin(ringRadians) * ringRadiusPx;
+  const ringKnobY = ringCenterPx - Math.cos(ringRadians) * ringRadiusPx;
 
   async function saveSettingsPatch(patch: Partial<BreakifySettings>) {
     const nextSettings = { ...state.settings, ...patch };
@@ -89,6 +98,10 @@ function App() {
 
   async function startBreak() {
     setError("");
+    if (breakSeconds < 1) {
+      setError("Set a break time before starting.");
+      return;
+    }
     const breakMinutes = secondsToMinutes(breakSeconds);
     const softWarningMinutes = secondsToMinutes(softWarningSeconds);
     await saveSettingsPatch({
@@ -147,12 +160,18 @@ function App() {
     setBreakSeconds(snappedSeconds);
   }
 
+  function isDurationControlTarget(target: EventTarget | null) {
+    return target instanceof HTMLElement && Boolean(target.closest(".duration-field"));
+  }
+
   function startRingDrag(event: React.PointerEvent<HTMLDivElement>) {
+    if (isDurationControlTarget(event.target)) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     setTimeFromPointer(event.clientX, event.clientY);
   }
 
   function dragRing(event: React.PointerEvent<HTMLDivElement>) {
+    if (isDurationControlTarget(event.target)) return;
     if (event.buttons !== 1) return;
     setTimeFromPointer(event.clientX, event.clientY);
   }
@@ -164,7 +183,7 @@ function App() {
   return (
     <main className="popup-shell">
       <header className="brand-header">
-        <div className="brand-mark">B</div>
+        <div className="brand-mark">E</div>
         <h1>Breakify</h1>
       </header>
 
@@ -206,7 +225,18 @@ function App() {
               aria-valuemax={maxRingSeconds}
               aria-valuenow={breakSeconds}
             >
-              <span className="ring-knob" style={{ transform: `translate(-50%, -50%) rotate(${ringAngle}deg) translateY(-119px)` }} />
+              <svg className="ring-art" viewBox={`0 0 ${ringSizePx} ${ringSizePx}`} aria-hidden="true">
+                <circle className="ring-track" cx={ringCenterPx} cy={ringCenterPx} r={ringRadiusPx} />
+                <circle
+                  className="ring-progress"
+                  cx={ringCenterPx}
+                  cy={ringCenterPx}
+                  r={ringRadiusPx}
+                  strokeDasharray={ringCircumference}
+                  strokeDashoffset={ringCircumference * (1 - ringProgress)}
+                />
+                <circle className="ring-knob" cx={ringKnobX} cy={ringKnobY} r="12" />
+              </svg>
               <p>Pick break time</p>
               <DurationInput label="Break length" valueSeconds={breakSeconds} minSeconds={1} onChange={setBreakSeconds} />
             </div>
@@ -228,10 +258,12 @@ function App() {
                 onChange={setSoftWarningSeconds}
                 hint="Reminder before the break ends."
               />
-              <div className="method-summary">
-                <span>Focus {scheduleDetails.focusMinutes ? `${scheduleDetails.focusMinutes} min` : "your pace"}</span>
-                <span>Break {scheduleDetails.shortBreakMinutes} min</span>
-              </div>
+              {scheduleMethod !== "custom" ? (
+                <div className="method-summary">
+                  <span>Focus {scheduleDetails.focusMinutes ? `${scheduleDetails.focusMinutes} min` : "your pace"}</span>
+                  <span>Break {scheduleDetails.shortBreakMinutes} min</span>
+                </div>
+              ) : null}
             </div>
 
             <Button variant="primary" icon={<Coffee size={17} />} onClick={startBreak}>
@@ -311,13 +343,13 @@ function App() {
 
       <nav className="bottom-actions" aria-label="Breakify actions">
         <button className="mini-action" title="Toggle theme" onClick={toggleTheme}>
-          {state.settings.theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+          {state.settings.theme === "dark" ? <Sun size={23} /> : <Moon size={23} />}
         </button>
         <button className="mini-action" title="History" onClick={() => chrome.runtime.openOptionsPage()}>
-          <BarChart3 size={17} />
+          <BarChart3 size={23} />
         </button>
         <button className="mini-action" title="Settings" onClick={openSettingsPage}>
-          <Settings size={17} />
+          <Settings size={23} />
         </button>
       </nav>
 

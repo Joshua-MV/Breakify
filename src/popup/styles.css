@@ -206,7 +206,7 @@ body[data-theme="dark"] .empty-note {
 
 .button-danger {
   color: #fff;
-  background: #be123c;
+  background: #f97316;
 }
 
 .button-icon {
@@ -308,7 +308,7 @@ body[data-theme="dark"] .empty-note {
   place-items: center;
   border: 1px solid #c8d8d4;
   border-radius: 8px;
-  color: #be123c;
+  color: #f97316;
   background: #fffdfa;
   cursor: pointer;
 }
@@ -321,7 +321,7 @@ body[data-theme="dark"] .empty-note {
 }
 
 .error {
-  color: #be123c;
+  color: #f97316;
   font-weight: 700;
 }
 
@@ -335,9 +335,9 @@ body[data-theme="dark"] .empty-note {
   --accent: #ff914d;
   --accent-strong: #f97316;
   --accent-soft: #ffe2cc;
-  --danger: #ef233c;
-  --danger-strong: #c1121f;
-  --danger-soft: rgba(239, 35, 60, 0.14);
+  --danger: #f97316;
+  --danger-strong: #ea580c;
+  --danger-soft: rgba(249, 115, 22, 0.14);
   --shadow: 0 24px 60px rgba(18, 20, 24, 0.22);
   --soft-shadow: 0 10px 30px rgba(18, 20, 24, 0.12);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -502,17 +502,17 @@ h1 {
 
 .button-primary {
   color: #fff;
-  background: linear-gradient(180deg, #ff4d5e, var(--danger));
+  background: linear-gradient(180deg, #ff914d, var(--danger));
   box-shadow:
-    0 12px 28px rgba(239, 35, 60, 0.32),
+    0 12px 28px rgba(249, 115, 22, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.42);
 }
 
 .button-danger {
   color: #fff;
-  background: linear-gradient(180deg, #ff4d5e, var(--danger-strong));
+  background: linear-gradient(180deg, #ff914d, var(--danger-strong));
   box-shadow:
-    0 12px 28px rgba(193, 18, 31, 0.34),
+    0 12px 28px rgba(234, 88, 12, 0.34),
     inset 0 1px 0 rgba(255, 255, 255, 0.32);
 }
 
@@ -581,18 +581,18 @@ body[data-theme="dark"] .selected-tab {
 body[data-theme="dark"] .button-primary,
 body[data-theme="dark"] .button-primary:hover {
   color: #fff;
-  background: linear-gradient(180deg, #ff4d5e, var(--danger));
+  background: linear-gradient(180deg, #ff914d, var(--danger));
   box-shadow:
-    0 12px 28px rgba(239, 35, 60, 0.36),
+    0 12px 28px rgba(249, 115, 22, 0.36),
     inset 0 1px 0 rgba(255, 255, 255, 0.38);
 }
 
 body[data-theme="dark"] .button-danger,
 body[data-theme="dark"] .button-danger:hover {
   color: #fff;
-  background: linear-gradient(180deg, #ff4d5e, var(--danger-strong));
+  background: linear-gradient(180deg, #ff914d, var(--danger-strong));
   box-shadow:
-    0 12px 28px rgba(193, 18, 31, 0.38),
+    0 12px 28px rgba(234, 88, 12, 0.38),
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
@@ -755,8 +755,8 @@ body[data-theme="dark"] .mini-action {
   place-items: center;
   border-radius: 9px;
   color: #fff;
-  background: linear-gradient(145deg, #ff4053, #c1121f);
-  box-shadow: 0 12px 24px rgba(193, 18, 31, 0.28);
+  background: linear-gradient(145deg, #ff914d, #f97316);
+  box-shadow: 0 12px 24px rgba(249, 115, 22, 0.28);
   font-size: 18px;
   font-weight: 900;
 }
@@ -864,7 +864,7 @@ body[data-theme="dark"] .timer-ring {
   height: 22px;
   border: 4px solid #fff;
   border-radius: 999px;
-  background: #e5484d;
+  background: #f97316;
 }
 
 body[data-theme="dark"] .ring-knob {
@@ -968,8 +968,8 @@ body[data-theme="dark"] .status-grid strong {
   min-height: 56px;
   border-radius: 999px;
   color: #fff;
-  background: linear-gradient(180deg, #ff4d5e, #c1121f);
-  box-shadow: 0 12px 28px rgba(193, 18, 31, 0.3);
+  background: linear-gradient(180deg, #ff914d, #f97316);
+  box-shadow: 0 12px 28px rgba(249, 115, 22, 0.3);
 }
 
 .inline-options {
@@ -994,13 +994,13 @@ body[data-theme="dark"] .status-grid strong {
 }
 
 .timer-card .button-primary:hover {
-  background: linear-gradient(180deg, #ff5d6c, #c1121f);
+  background: linear-gradient(180deg, #ffa766, #f97316);
 }
 
 body[data-theme="dark"] .timer-card .button-primary {
   color: #fff;
-  background: linear-gradient(180deg, #ff4d5e, #c1121f);
-  box-shadow: 0 12px 28px rgba(193, 18, 31, 0.3);
+  background: linear-gradient(180deg, #ff914d, #f97316);
+  box-shadow: 0 12px 28px rgba(249, 115, 22, 0.3);
 }
 
 .tab-picker {
@@ -1034,7 +1034,7 @@ body[data-theme="dark"] .timer-card .button-primary {
 }
 
 .settings-toggle strong {
-  color: #c1121f;
+  color: #f97316;
   font-size: 13px;
 }
 
@@ -1093,4 +1093,205 @@ body[data-theme="dark"] .quick-actions button {
 
 body[data-theme="dark"] .method-summary span {
   background: rgba(255, 255, 255, 0.08);
+}
+
+:root {
+  --canvas: #f7f4ef;
+  --surface: #ffffff;
+  --surface-soft: #f2eee8;
+  --text: #050505;
+  --muted: #5f5a54;
+  --line: rgba(5, 5, 5, 0.11);
+  --accent: #ff914d;
+  --accent-strong: #f97316;
+  --accent-soft: #fff0e6;
+  --danger: #f97316;
+  --danger-strong: #ea580c;
+  --ring-size: 268px;
+  --ring-stroke: 14px;
+  --ring-knob-size: 24px;
+  --ring-knob-radius: calc((var(--ring-size) - var(--ring-stroke)) / 2);
+}
+
+body {
+  background: var(--canvas);
+  color: var(--text);
+}
+
+body[data-theme="dark"] {
+  --canvas: #050505;
+  --surface: #111111;
+  --surface-soft: #1c1c1f;
+  --text: #ffffff;
+  --muted: #d7d0c8;
+  --line: rgba(255, 255, 255, 0.14);
+  --accent-soft: rgba(249, 115, 22, 0.18);
+  background: var(--canvas);
+  color: var(--text);
+}
+
+.brand-mark,
+.button-primary,
+.button-danger,
+.timer-card .button-primary,
+.timer-card .button-primary:hover,
+body[data-theme="dark"] .button-primary,
+body[data-theme="dark"] .button-danger,
+body[data-theme="dark"] .timer-card .button-primary {
+  color: #fff;
+  background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+  box-shadow: 0 12px 28px rgba(249, 115, 22, 0.3);
+}
+
+.settings-toggle strong,
+.error,
+.timer-row,
+.eyebrow {
+  color: var(--accent-strong);
+}
+
+.timer-card,
+.tab-picker,
+.settings-card,
+body[data-theme="dark"] .timer-card,
+body[data-theme="dark"] .tab-picker,
+body[data-theme="dark"] .settings-card {
+  background: var(--surface);
+}
+
+.timer-ring {
+  width: var(--ring-size);
+  height: var(--ring-size);
+  border: 0;
+  padding: 24px;
+  overflow: visible;
+}
+
+body[data-theme="dark"] .timer-ring {
+  border: 0;
+}
+
+.timer-ring::before {
+  content: none;
+}
+
+.timer-ring > * {
+  position: relative;
+  z-index: 1;
+}
+
+.ring-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ring-track,
+.ring-progress {
+  fill: none;
+  stroke-width: var(--ring-stroke);
+}
+
+.ring-track {
+  stroke: #eadfd5;
+}
+
+.ring-progress {
+  stroke: var(--accent-strong);
+  stroke-linecap: butt;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.ring-art .ring-knob {
+  position: static;
+  width: auto;
+  height: auto;
+  fill: var(--accent-strong);
+  stroke: var(--surface);
+  stroke-width: 4;
+  filter: drop-shadow(0 8px 10px rgba(249, 115, 22, 0.38));
+  transform: none;
+  z-index: 2;
+}
+
+body[data-theme="dark"] .ring-track {
+  stroke: #2f3036;
+}
+
+body[data-theme="dark"] .ring-art .ring-knob {
+  stroke: var(--surface);
+}
+
+.timer-ring .duration-field {
+  width: min(100%, 198px);
+}
+
+.timer-ring .duration-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.timer-ring .duration-grid input {
+  min-width: 0;
+  min-height: 42px;
+  padding: 8px 4px;
+  color: var(--text);
+  background: var(--surface-soft);
+  font-size: 14px;
+  text-align: center;
+}
+
+.timer-ring .duration-grid span,
+.timer-ring p,
+body[data-theme="dark"] .timer-ring .duration-grid span,
+body[data-theme="dark"] .timer-ring p {
+  color: var(--muted);
+}
+
+.method-summary {
+  align-items: center;
+}
+
+.method-summary span {
+  color: var(--text);
+  background: var(--surface-soft);
+}
+
+.mini-action {
+  width: 44px;
+  height: 44px;
+  color: #050505;
+  background: #fff;
+}
+
+body[data-theme="dark"] .mini-action {
+  color: #ffffff;
+  background: #1c1c1f;
+}
+
+.bottom-actions {
+  align-items: center;
+  gap: 14px;
+}
+
+.field,
+.duration-field,
+.section-heading,
+.method-summary span,
+.status-pill,
+.button,
+.input {
+  min-width: 0;
+}
+
+h1,
+h2,
+h3,
+.brand-header h1 {
+  font-weight: 900;
 }

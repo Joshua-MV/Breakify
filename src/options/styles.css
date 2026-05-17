@@ -308,7 +308,7 @@ body[data-theme="dark"] .stat p {
   width: 34px;
   height: 34px;
   border: 1px solid #d8d1c4;
-  color: #be123c;
+  color: #f97316;
   background: #fffdfa;
 }
 
@@ -362,7 +362,7 @@ body[data-theme="dark"] .stat p {
 }
 
 .error {
-  color: #be123c;
+  color: #f97316;
   font-weight: 800;
 }
 
@@ -392,8 +392,8 @@ body[data-theme="dark"] .stat p {
   --accent: #ff914d;
   --accent-strong: #f97316;
   --accent-soft: #ffe2cc;
-  --danger: #ef233c;
-  --danger-strong: #c1121f;
+  --danger: #f97316;
+  --danger-strong: #ea580c;
   --shadow: 0 24px 60px rgba(18, 20, 24, 0.22);
   --soft-shadow: 0 10px 30px rgba(18, 20, 24, 0.12);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -529,9 +529,9 @@ h3 {
 .button-primary {
   color: #fff;
   border-color: transparent;
-  background: linear-gradient(180deg, #ff4d5e, var(--danger));
+  background: linear-gradient(180deg, #ff914d, var(--danger));
   box-shadow:
-    0 12px 28px rgba(239, 35, 60, 0.32),
+    0 12px 28px rgba(249, 115, 22, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.42);
 }
 
@@ -608,9 +608,9 @@ body[data-theme="dark"] .button-primary,
 body[data-theme="dark"] .button-primary:hover {
   color: #fff;
   border-color: transparent;
-  background: linear-gradient(180deg, #ff4d5e, var(--danger));
+  background: linear-gradient(180deg, #ff914d, var(--danger));
   box-shadow:
-    0 12px 28px rgba(239, 35, 60, 0.36),
+    0 12px 28px rgba(249, 115, 22, 0.36),
     inset 0 1px 0 rgba(255, 255, 255, 0.38);
 }
 
@@ -710,4 +710,10 @@ body[data-theme="dark"] .select {
 body[data-theme="dark"] .select option {
   color: #f7f2eb;
   background: #1c222b;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 900;
 }

@@ -120,8 +120,8 @@ body[data-theme="dark"] .button {
   --accent: #ff914d;
   --accent-strong: #f97316;
   --accent-soft: #ffe2cc;
-  --danger: #ef233c;
-  --danger-strong: #c1121f;
+  --danger: #f97316;
+  --danger-strong: #ea580c;
   --shadow: 0 24px 60px rgba(18, 20, 24, 0.22);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -206,9 +206,9 @@ body[data-theme="dark"] .copy {
 .button-primary {
   color: #fff;
   border-color: transparent;
-  background: linear-gradient(180deg, #ff4d5e, var(--danger));
+  background: linear-gradient(180deg, #ff914d, var(--danger));
   box-shadow:
-    0 12px 28px rgba(239, 35, 60, 0.32),
+    0 12px 28px rgba(249, 115, 22, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.42);
 }
 
@@ -221,9 +221,9 @@ body[data-theme="dark"] .button {
 body[data-theme="dark"] .button-primary,
 body[data-theme="dark"] .button-primary:hover {
   color: #fff;
-  background: linear-gradient(180deg, #ff4d5e, var(--danger));
+  background: linear-gradient(180deg, #ff914d, var(--danger));
   box-shadow:
-    0 12px 28px rgba(239, 35, 60, 0.36),
+    0 12px 28px rgba(249, 115, 22, 0.36),
     inset 0 1px 0 rgba(255, 255, 255, 0.38);
 }
 
@@ -245,4 +245,10 @@ body[data-theme="dark"] .button-primary:hover {
     animation-duration: 1ms !important;
     transition-duration: 1ms !important;
   }
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 900;
 }

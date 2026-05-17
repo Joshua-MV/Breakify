@@ -37,8 +37,8 @@
 
 .option.active {
   color: #fff;
-  background: #c1121f;
-  box-shadow: 0 12px 28px rgba(193, 18, 31, 0.3);
+  background: #f97316;
+  box-shadow: 0 12px 28px rgba(249, 115, 22, 0.3);
 }
 
 @media (max-width: 760px) {

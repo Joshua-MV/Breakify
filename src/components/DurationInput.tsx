@@ -13,7 +13,7 @@ export function DurationInput({ label, valueSeconds, hint, minSeconds = 0, onCha
 
   function update(part: "hours" | "minutes" | "seconds", value: number) {
     const next = combineDuration({ ...parts, [part]: Number.isFinite(value) ? value : 0 });
-    onChange(Math.max(minSeconds, next));
+    onChange(next);
   }
 
   return (
