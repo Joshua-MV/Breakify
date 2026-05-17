@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Breakify",
+  "description": "Take intentional breaks and return to your work tabs exactly where you left off.",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "Breakify",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icons/icon-128.png"
+    }
+  },
+  "icons": {
+    "128": "icons/icon-128.png"
+  },
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": ["alarms", "notifications", "storage", "tabs", "windows"],
+  "host_permissions": ["<all_urls>"]
+}
