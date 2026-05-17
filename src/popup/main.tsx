@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { BarChart3, Check, Clock3, Coffee, Moon, Plus, Settings, Square, Sun, X } from "lucide-react";
+import { BarChart3, Check, Clock3, Coffee, Moon, Plus, Settings, Sparkles, Square, Sun, X } from "lucide-react";
 import { minutesToSeconds, secondsToMinutes } from "../core/duration";
 import { getRemainingMs } from "../core/session";
-import { getSchedulePreset, schedulePresets } from "../core/schedule";
+import { getDefaultBreakMinutes, getSchedulePreset, schedulePresets } from "../core/schedule";
 import { defaultSettings } from "../core/settings";
 import { Button } from "../components/Button";
 import { DurationInput } from "../components/DurationInput";
@@ -161,6 +161,13 @@ function App() {
     setSelectedReturnTabIds((current) => current.filter((id) => id !== tabId));
   }
 
+  function chooseScheduleMethod(method: ScheduleMethod) {
+    setScheduleMethod(method);
+    if (method !== "custom") {
+      setBreakSeconds(minutesToSeconds(getDefaultBreakMinutes(method, state.settings.customSchedule)));
+    }
+  }
+
   function setTimeFromPointer(clientX: number, clientY: number) {
     const rect = ringRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -169,7 +176,7 @@ function App() {
     const radians = Math.atan2(clientY - centerY, clientX - centerX);
     const normalized = (radians + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2);
     const rawSeconds = (normalized / (Math.PI * 2)) * maxRingSeconds;
-    const snappedSeconds = Math.max(30, Math.round(rawSeconds / 30) * 30);
+    const snappedSeconds = Math.round(rawSeconds / 30) * 30;
     setBreakSeconds(snappedSeconds);
   }
 
@@ -227,6 +234,9 @@ function App() {
       ) : (
         <section className="start-flow">
           <section className="timer-card">
+            <div className="break-note title-note">
+              <span>Take a break, you deserve it.</span>
+            </div>
             <div
               className="timer-ring"
               ref={ringRef}
@@ -248,15 +258,24 @@ function App() {
                   strokeDasharray={ringCircumference}
                   strokeDashoffset={ringCircumference * (1 - ringProgress)}
                 />
-                <circle className="ring-knob" cx={ringKnobX} cy={ringKnobY} r="12" />
+                <circle className="ring-knob" cx={ringKnobX} cy={ringKnobY} r="9" />
               </svg>
               <p>Pick break time</p>
-              <DurationInput label="Break length" valueSeconds={breakSeconds} minSeconds={1} onChange={setBreakSeconds} />
+              <DurationInput
+                label="Break length"
+                valueSeconds={breakSeconds}
+                minSeconds={1}
+                unitLabels={{ hours: "HOURS", minutes: "MINUTES", seconds: "SECONDS" }}
+                onChange={setBreakSeconds}
+              />
+              <div className="timer-hint">
+                <Sparkles size={15} />
+                <span>Perfect for a quick recharge.</span>
+              </div>
             </div>
-
             <div className="inline-options">
               <Field label="Method">
-                <SelectInput value={scheduleMethod} onChange={(event) => setScheduleMethod(event.target.value as ScheduleMethod)}>
+                <SelectInput value={scheduleMethod} onChange={(event) => chooseScheduleMethod(event.target.value as ScheduleMethod)}>
                   {Object.values(schedulePresets).map((preset) => (
                     <option key={preset.method} value={preset.method}>
                       {preset.label}

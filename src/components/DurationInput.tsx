@@ -5,10 +5,22 @@ interface DurationInputProps {
   valueSeconds: number;
   hint?: string;
   minSeconds?: number;
+  unitLabels?: {
+    hours: string;
+    minutes: string;
+    seconds: string;
+  };
   onChange: (seconds: number) => void;
 }
 
-export function DurationInput({ label, valueSeconds, hint, minSeconds = 0, onChange }: DurationInputProps) {
+export function DurationInput({
+  label,
+  valueSeconds,
+  hint,
+  minSeconds = 0,
+  unitLabels = { hours: "HRS", minutes: "MIN", seconds: "SEC" },
+  onChange,
+}: DurationInputProps) {
   const parts = splitSeconds(valueSeconds);
 
   function update(part: "hours" | "minutes" | "seconds", value: number) {
@@ -21,7 +33,7 @@ export function DurationInput({ label, valueSeconds, hint, minSeconds = 0, onCha
       <legend>{label}</legend>
       <div className="duration-grid">
         <label>
-          <span>HRS</span>
+          <span>{unitLabels.hours}</span>
           <input
             type="text"
             inputMode="numeric"
@@ -31,7 +43,7 @@ export function DurationInput({ label, valueSeconds, hint, minSeconds = 0, onCha
           />
         </label>
         <label>
-          <span>MIN</span>
+          <span>{unitLabels.minutes}</span>
           <input
             type="text"
             inputMode="numeric"
@@ -41,7 +53,7 @@ export function DurationInput({ label, valueSeconds, hint, minSeconds = 0, onCha
           />
         </label>
         <label>
-          <span>SEC</span>
+          <span>{unitLabels.seconds}</span>
           <input
             type="text"
             inputMode="numeric"
