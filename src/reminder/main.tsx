@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { Check, Clock3, Plus, X } from "lucide-react";
+import { Clock3, Plus } from "lucide-react";
 import { getRemainingMs } from "../core/session";
 import { defaultSettings } from "../core/settings";
 import { Button } from "../components/Button";
@@ -72,11 +72,11 @@ function App() {
         </Button>
       </div>
       <div className="actions">
-        <Button variant="primary" icon={<Check size={16} />} onClick={closeBreakTabs}>
-          Return now
-        </Button>
-        <Button icon={<X size={16} />} onClick={endEarly}>
+        <Button variant="primary" onClick={endEarly}>
           End break
+        </Button>
+        <Button onClick={closeBreakTabs}>
+          Return now
         </Button>
       </div>
     </main>

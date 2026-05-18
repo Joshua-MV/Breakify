@@ -1,12 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { BarChart3, Check, Clock3, Coffee, Moon, Plus, Settings, Sparkles, Square, Sun, X } from "lucide-react";
-import { minutesToSeconds, secondsToMinutes } from "../core/duration";
+import { combineDuration, minutesToSeconds, secondsToMinutes, splitSeconds } from "../core/duration";
 import { getRemainingMs } from "../core/session";
 import { getDefaultBreakMinutes, getSchedulePreset, schedulePresets } from "../core/schedule";
 import { defaultSettings } from "../core/settings";
 import { Button } from "../components/Button";
 import { DurationInput } from "../components/DurationInput";
+import type { DurationPart } from "../components/DurationInput";
 import { Field, SelectInput } from "../components/Field";
 import { StatusPill } from "../components/StatusPill";
 import { sendBreakifyMessage } from "../shared/client";
@@ -14,7 +15,8 @@ import type { BreakifyStateResponse, CurrentTabOption } from "../shared/messages
 import type { BreakEndBehavior, BreakifySettings, ScheduleMethod } from "../shared/types";
 import "./styles.css";
 
-const MAX_BREAK_SECONDS = 2 * 60 * 60;
+const MAX_BREAK_HOURS = 12;
+const MAX_BREAK_SECONDS = MAX_BREAK_HOURS * 60 * 60 + 59 * 60;
 
 function formatRemaining(ms: number): string {
   const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
@@ -36,6 +38,7 @@ function App() {
   const [returnTabToAdd, setReturnTabToAdd] = useState("");
   const [scheduleMethod, setScheduleMethod] = useState<ScheduleMethod>(defaultSettings.scheduleMethod);
   const [breakEndBehavior, setBreakEndBehavior] = useState<BreakEndBehavior>(defaultSettings.breakEndBehavior);
+  const [durationRingPart, setDurationRingPart] = useState<Extract<DurationPart, "hours" | "minutes">>("minutes");
   const [now, setNow] = useState(Date.now());
   const [error, setError] = useState("");
 
@@ -87,8 +90,10 @@ function App() {
   const selectedReturnTabs = tabs.filter((tab) => selectedReturnTabIds.includes(tab.id));
   const availableReturnTabs = tabs.filter((tab) => !selectedReturnTabIds.includes(tab.id) && !selectedTabIds.includes(tab.id));
   const scheduleDetails = getSchedulePreset(scheduleMethod, state.settings.customSchedule);
-  const maxRingSeconds = MAX_BREAK_SECONDS;
-  const ringAngle = Math.max(0, Math.min(360, (breakSeconds / maxRingSeconds) * 360));
+  const breakParts = splitSeconds(breakSeconds);
+  const ringValue = durationRingPart === "hours" ? breakParts.hours : breakParts.minutes;
+  const ringMax = durationRingPart === "hours" ? MAX_BREAK_HOURS : 59;
+  const ringAngle = Math.max(0, Math.min(360, (ringValue / ringMax) * 360));
   const ringSizePx = 268;
   const ringStrokePx = 14;
   const ringCenterPx = ringSizePx / 2;
@@ -168,6 +173,16 @@ function App() {
     }
   }
 
+  function setBreakDuration(seconds: number) {
+    setBreakSeconds(Math.max(0, Math.min(MAX_BREAK_SECONDS, seconds)));
+  }
+
+  function setBreakPart(part: Extract<DurationPart, "hours" | "minutes">, value: number) {
+    const current = splitSeconds(breakSeconds);
+    const nextParts = { ...current, [part]: Math.max(0, Math.round(value)), seconds: 0 };
+    setBreakDuration(combineDuration(nextParts));
+  }
+
   function setTimeFromPointer(clientX: number, clientY: number) {
     const rect = ringRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -175,9 +190,8 @@ function App() {
     const centerY = rect.top + rect.height / 2;
     const radians = Math.atan2(clientY - centerY, clientX - centerX);
     const normalized = (radians + Math.PI / 2 + Math.PI * 2) % (Math.PI * 2);
-    const rawSeconds = (normalized / (Math.PI * 2)) * maxRingSeconds;
-    const snappedSeconds = Math.round(rawSeconds / 30) * 30;
-    setBreakSeconds(snappedSeconds);
+    const nextValue = Math.round((normalized / (Math.PI * 2)) * ringMax);
+    setBreakPart(durationRingPart, nextValue);
   }
 
   function isDurationControlTarget(target: EventTarget | null) {
@@ -244,9 +258,9 @@ function App() {
               onPointerMove={dragRing}
               role="slider"
               aria-label="Break duration"
-              aria-valuemin={30}
-              aria-valuemax={maxRingSeconds}
-              aria-valuenow={breakSeconds}
+              aria-valuemin={0}
+              aria-valuemax={ringMax}
+              aria-valuenow={ringValue}
             >
               <svg className="ring-art" viewBox={`0 0 ${ringSizePx} ${ringSizePx}`} aria-hidden="true">
                 <circle className="ring-track" cx={ringCenterPx} cy={ringCenterPx} r={ringRadiusPx} />
@@ -265,8 +279,13 @@ function App() {
                 label="Break length"
                 valueSeconds={breakSeconds}
                 minSeconds={1}
-                unitLabels={{ hours: "HOURS", minutes: "MINUTES", seconds: "SECONDS" }}
-                onChange={setBreakSeconds}
+                activePart={durationRingPart}
+                unitLabels={{ hours: "HRS", minutes: "MIN", seconds: "SEC" }}
+                showSeconds={false}
+                onPartFocus={(part) => {
+                  if (part === "hours" || part === "minutes") setDurationRingPart(part);
+                }}
+                onChange={setBreakDuration}
               />
               <div className="timer-hint">
                 <Sparkles size={15} />

@@ -25,16 +25,27 @@ async function getState() {
   return { settings, activeSession, history };
 }
 
-async function finishSession(session: BreakSession, closeBreakTabs: boolean, outcome?: SessionOutcome): Promise<void> {
+async function finishSession(
+  session: BreakSession,
+  closeBreakTabs: boolean,
+  outcome?: SessionOutcome,
+  options: { restoreWork?: boolean } = {}
+): Promise<void> {
+  const { restoreWork = true } = options;
   if (closeBreakTabs) {
-    await closeTabs(session.trackedBreakTabIds);
+    const returnTabIds = new Set(session.settings.selectedReturnTabIds);
+    await closeTabs(session.trackedBreakTabIds.filter((tabId) => !returnTabIds.has(tabId)));
   }
-  await restoreWorkTabs(session);
+  if (restoreWork) {
+    await restoreWorkTabs(session);
+  }
   const completed = completeSession(session, Date.now(), outcome);
   await addHistoryEntry(sessionToHistoryEntry(completed));
   await saveActiveSession(undefined);
   await clearBreakAlarms();
-  await showRestoredNotification();
+  if (restoreWork) {
+    await showRestoredNotification();
+  }
 }
 
 async function handleBreakEnd(): Promise<void> {
@@ -73,7 +84,10 @@ async function handleMessage(message: BreakifyMessage): Promise<BreakifyResponse
 
     if (message.type === "START_BREAK") {
       const settings = await getSettings();
-      const initialBreakTabIds = await getInitialBreakTabIds(message.payload.selectedBreakTabIds, settings.allowlistRules);
+      const returnTabIds = new Set(message.payload.selectedReturnTabIds);
+      const initialBreakTabIds = (await getInitialBreakTabIds(message.payload.selectedBreakTabIds, settings.allowlistRules)).filter(
+        (tabId) => !returnTabIds.has(tabId)
+      );
       const workSnapshot = await captureWorkSnapshot(initialBreakTabIds, message.payload.selectedReturnTabIds);
       const breakMinutes = message.payload.breakMinutes || getDefaultBreakMinutes(settings.scheduleMethod, settings.customSchedule);
       const session = createBreakSession({
@@ -178,6 +192,7 @@ chrome.tabs.onUpdated.addListener((tabId, _changeInfo, tab) => {
   void (async () => {
     const session = await getActiveSession();
     if (!session) return;
+    if (session.settings.selectedReturnTabIds.includes(tabId)) return;
     if (matchesAllowlist(tab.url, session.settings.allowlistRules)) {
       await saveActiveSession(trackBreakTab(session, tabId));
     }

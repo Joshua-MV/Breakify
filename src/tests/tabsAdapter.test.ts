@@ -86,6 +86,22 @@ describe("tabs adapter", () => {
     expect(snapshot.activeTabId).toBe(2);
   });
 
+  it("can snapshot a selected return tab when it is not excluded as a break tab", async () => {
+    const query = vi
+      .fn()
+      .mockResolvedValueOnce([{ id: 1, windowId: 1, active: true }])
+      .mockResolvedValueOnce([
+        { id: 1, windowId: 1, index: 0, url: "https://work.example", active: true, pinned: false },
+        { id: 2, windowId: 1, index: 1, url: "https://break.example", active: false, pinned: false }
+      ]);
+    vi.stubGlobal("chrome", { tabs: { query } });
+
+    const snapshot = await captureWorkSnapshot([2], [1]);
+
+    expect(snapshot.tabs.map((tab) => tab.id)).toEqual([1]);
+    expect(snapshot.activeTabId).toBe(1);
+  });
+
   it("finds already-open tabs that match selected ids or allowlist rules", async () => {
     const query = vi.fn().mockResolvedValue([
       { id: 1, url: "https://work.example" },
