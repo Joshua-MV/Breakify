@@ -24,6 +24,5 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["alarms", "notifications", "storage", "tabs", "windows"],
-  "host_permissions": ["<all_urls>"]
+  "permissions": ["alarms", "notifications", "storage", "tabs", "windows"]
 }
